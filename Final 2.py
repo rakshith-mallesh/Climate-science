@@ -33,6 +33,161 @@ lons = f1.variables['longitude'][:]
 latli = np.argmin( np.abs( lats - latbounds[0] ) )
 latui = np.argmin( np.abs( lats - latbounds[1] ) ) 
 
+
+
+
+
+
+
+
+#Comparing ERA and NCEP Pwat for a few years
+c = #tcwv dataset here 
+d = 'land sea ERA.nc'
+f3 = netCDF4.Dataset(c)
+f4 = netCDF4.Dataset(d)
+pwat1979 = []
+pwat1980 = []
+pwat1982 = []
+pwat1983 = []
+pwat1987 = []
+pwat1988 = []
+pwat2002 = []
+pwat2003 = []
+
+for i in range(0, 365):
+    v1 = f3['tcwv'][i, 20:61, 20:61]
+    v2 = f3['tcwv'][i+365, 20:61, 20:61]
+    v3 = f3['tcwv'][i+731, 20:61, 20:61]
+    v4 = f3['tcwv'][i+1096, 20:61, 20:61]
+    v5 = f3['tcwv'][i+1461, 20:61, 20:61]
+    v6 = f3['tcwv'][i+1826, 20:61, 20:61]
+    v7 = f3['tcwv'][i+2192, 20:61, 20:61]
+    v8 = f3['tcwv'][i+2557, 20:61, 20:61]
+    vl = f4['lsm'][0, 20:61, 20:61]
+    x1 = np.multiply(vl,v1)
+    x2 = np.multiply(vl,v2)
+    x3 = np.multiply(vl,v3)
+    x4 = np.multiply(vl,v4)
+    x5 = np.multiply(vl,v5)
+    x6 = np.multiply(vl,v6)
+    x7 = np.multiply(vl,v7)
+    x8 = np.multiply(vl,v8)
+    pwat1979.append(np.average(x1[np.nonzero(x1)]))
+    pwat1980.append(np.average(x2[np.nonzero(x2)]))
+    pwat1982.append(np.average(x3[np.nonzero(x3)]))
+    pwat1983.append(np.average(x4[np.nonzero(x4)]))
+    pwat1987.append(np.average(x5[np.nonzero(x5)]))
+    pwat1988.append(np.average(x6[np.nonzero(x6)]))
+    pwat2002.append(np.average(x7[np.nonzero(x7)]))
+    pwat2003.append(np.average(x8[np.nonzero(x8)]))
+
+a = 'pr_wtr.eatm.1979.nc'
+b = 'pr_wtr.eatm.1980.nc'
+c = 'pr_wtr.eatm.1982.nc'
+d = 'pr_wtr.eatm.1983.nc'
+e = 'pr_wtr.eatm.1987.nc'
+f = 'pr_wtr.eatm.1988.nc'
+g = 'pr_wtr.eatm.2002.nc'
+h = 'pr_wtr.eatm.2003.nc'
+i = 'land sea.nc'
+f1 = netCDF4.Dataset(a)
+f2 = netCDF4.Dataset(b)
+f3 = netCDF4.Dataset(c)
+f4 = netCDF4.Dataset(d)
+f5 = netCDF4.Dataset(e)
+f6 = netCDF4.Dataset(f)
+f7 = netCDF4.Dataset(g)
+f8 = netCDF4.Dataset(h)
+f9 = netCDF4.Dataset(i)
+
+P1=[]
+P2=[]
+P3=[]
+P4=[]
+P5=[]
+P6=[]
+P7=[]
+P8=[]
+
+for i in range(0, 365):
+	v1 = f1['pr_wtr'][i, 26:31, 30:35]
+	v2 = f2['pr_wtr'][i, 26:31, 30:35]
+	v3 = f3['pr_wtr'][i, 26:31, 30:35]
+	v4 = f4['pr_wtr'][i, 26:31, 30:35]
+	v5 = f5['pr_wtr'][i, 26:31, 30:35]
+	v6 = f6['pr_wtr'][i, 26:31, 30:35]
+	v7 = f7['pr_wtr'][i, 26:31, 30:35]
+	v8 = f8['pr_wtr'][i, 26:31, 30:35]
+	vl = f9['land'][0, 26:31, 30:35]
+	x1 = np.multiply(vl,v1)
+	x2 = np.multiply(vl,v2)
+	x3 = np.multiply(vl,v3)
+	x4 = np.multiply(vl,v4)
+	x5 = np.multiply(vl,v5)
+	x6 = np.multiply(vl,v6)
+	x7 = np.multiply(vl,v7)
+	x8 = np.multiply(vl,v8)
+	P1.append(np.average(x1[np.nonzero(x1)]))
+	P2.append(np.average(x2[np.nonzero(x2)]))
+	P3.append(np.average(x3[np.nonzero(x3)]))
+	P4.append(np.average(x4[np.nonzero(x4)]))
+	P5.append(np.average(x5[np.nonzero(x5)]))
+	P6.append(np.average(x6[np.nonzero(x6)]))
+	P7.append(np.average(x7[np.nonzero(x7)]))
+	P8.append(np.average(x8[np.nonzero(x8)]))
+
+    
+X = np.linspace(1, 365, 365, dtype='int')
+ 
+plt.subplot(4, 2, 1)   
+plt.plot(X, pwat1979, c = 'g', linewidth=0.4)
+plt.plot(X, P1, c = 'r', linewidth=0.4)
+plt.title('Pwat for 1979', fontsize=8)
+
+plt.subplot(4, 2, 2)   
+plt.plot(X, pwat1980, c = 'g', linewidth=0.4)
+plt.plot(X, P2, c = 'r', linewidth=0.4)
+plt.title('Pwat for 1980', fontsize=8)
+
+plt.subplot(4, 2, 3)   
+plt.plot(X, pwat1982, c = 'g', linewidth=0.4)
+plt.plot(X, P3, c = 'r', linewidth=0.4)
+plt.ylabel('Precipitable water content (Kg/m^2)                         ')
+plt.title('Pwat for 1982', fontsize=8)
+
+plt.subplot(4, 2, 4)   
+plt.plot(X, pwat1983, c = 'g', linewidth=0.4)
+plt.plot(X, P4, c = 'r', linewidth=0.4)
+plt.title('Pwat for 1983', fontsize=8)
+
+plt.subplot(4, 2, 5)   
+plt.plot(X, pwat1987, c = 'g', linewidth=0.4)
+plt.plot(X, P5, c = 'r', linewidth=0.4)
+plt.title('Pwat for 1987', fontsize=8)
+
+plt.subplot(4, 2, 6)   
+plt.plot(X, pwat1988, c = 'g', linewidth=0.4)
+plt.plot(X, P6, c = 'r', linewidth=0.4)
+plt.title('Pwat for 1988', fontsize=8)
+
+plt.subplot(4, 2, 7)   
+plt.plot(X, pwat2002, c = 'g', linewidth=0.4)
+plt.plot(X, P7, c = 'r', linewidth=0.4)
+plt.xlabel('Day of the year')
+plt.title('Pwat for 2002', fontsize=8)
+
+plt.subplot(4, 2, 8)   
+plt.plot(X, pwat2003, c = 'g', label = 'ERA5', linewidth=0.4)
+plt.plot(X, P8, c = 'r', label = 'NCEP', linewidth=0.4)
+plt.xlabel('Day of the year')
+plt.title('Pwat for 2003', fontsize=8)
+plt.legend(bbox_to_anchor = (1, 1))
+plt.tight_layout()
+plt.savefig('Pwat.png', dpi=1200, bbox_inches="tight")
+plt.show()
+
+
+
 # longitude lower and upper index
 lonli = np.argmin( np.abs( lons - lonbounds[0] ) )
 lonui = np.argmin( np.abs( lons - lonbounds[1] ) ) 
@@ -178,3 +333,220 @@ plt.show()
 
 print(np.corrcoef(psstninoan, prainan))
 print(np.corrcoef(nsstninoan, nrainan))
+
+
+
+
+
+
+
+
+
+
+#JJAS TGMS comparison for a particular year NCEP and ERA5
+
+a = "land sea.nc"
+b = "dswrf.ntat.nc"
+c = "uswrf.ntat.nc"
+d = "ulwrf.ntat.nc"
+e = "lhtfl.nc" #this is the evaporation rate
+f = "prate.nc"
+
+f1 = netCDF4.Dataset(a)
+f2 = netCDF4.Dataset(b)
+f3 = netCDF4.Dataset(c)
+f4 = netCDF4.Dataset(d)
+f5 = netCDF4.Dataset(e)
+f6 = netCDF4.Dataset(f)
+
+QNCEP = []
+PNCEP = []
+
+year = int(input('What is the year you want to do the comparison for?\n'))
+j=(year-1979)*12+5
+for i in range(j,j+4):
+		v1 = f1['land'][0, 31:47, 38:49]
+		v2 = f2['dswrf'][i, 31:47, 38:49]
+		v3 = f3['uswrf'][i, 31:47, 38:49]
+		v4 = f4['ulwrf'][i, 31:47, 38:49]
+		v5 = f5['lhtfl'][i, 31:47, 38:49]
+		v6 = f6['prate'][i, 31:47, 38:49]
+		x = np.multiply(v1, 86400*28.94*v6-v5)
+		y = np.multiply(v1, v2 - v3 - v4)
+		PNCEP.append(np.average(x[np.nonzero(x)]))
+		QNCEP.append(np.average(y[np.nonzero(y)]))
+
+#print(86400*28.94*v6, v5)
+
+TGMSNCEP = []
+for i in range(len(QNCEP)):
+    TGMSNCEP.append(QNCEP[i]/PNCEP[i])
+
+g = 'land sea ERA.nc'
+h = 'TGMS ERA 1979-2022, India only.nc'
+f7 = netCDF4.Dataset(g)
+f8 = netCDF4.Dataset(h)
+
+QERA = []
+PERA = []
+
+
+j=(year-1979)*4
+for i in range(j, j+4):
+    v1 = f7['lsm'][0, :, :]
+    v2 = f8['mtnswrf'][i, :, :]
+    v3 = f8['mtnlwrf'][i, :, :]
+    v4 = f8['mtpr'][i, :, :]
+    v5 = f8['mer'][i, :, :]
+    x = np.multiply(v1, 86400*28.94*(v4+v5))
+    y = np.multiply(v1, v2+v3)
+    PERA.append(np.average(x[np.nonzero(x)]))
+    QERA.append(np.average(y[np.nonzero(y)]))
+
+TGMSERA = []
+for i in range(len(QERA)):
+    TGMSERA.append(QERA[i]/PERA[i])
+
+plt.style.use('bmh') 
+X = ['June', 'July', 'August', 'September']
+plt.subplot(3, 1, 1)
+plt.plot(X, QNCEP, c='b')
+plt.plot(X, QERA, c='tab:orange')
+plt.ylabel("Qnet (W/m^2)")
+plt.title('Year: '+ str(year))
+
+plt.subplot(3,1,2)
+plt.plot(X, PNCEP, c='b')
+plt.plot(X, PERA, c='tab:orange')
+plt.ylabel("P-E (W/m^2)")
+
+plt.subplot(3,1,3)
+plt.plot(X, TGMSNCEP)
+plt.plot(X, TGMSERA, c='tab:orange')
+plt.ylabel("TGMS")
+plt.legend(['NCEP', 'ERA'])
+plt.tight_layout()
+#plt.savefig('TGMS '+str(year)+'.png', dpi=150, bbox_inches="tight")
+plt.show()
+
+
+
+
+
+
+
+
+#Comparision of ERA, NCEP Qnet with CERES for a particular year
+k = 'CERES.nc'
+f9 = netCDF4.Dataset(k)
+
+QNCEP = []
+PNCEP = []
+
+initial = 1979
+year = int(input('What is the year you want to do the comparison for? (Only 2000-2021 for CERES)\n'))
+j=(year-initial)*12+5
+
+for i in range(j,j+4):
+		v1 = f1['land'][0, 31:47, 38:49]
+		v2 = f2['dswrf'][i, 31:47, 38:49]
+		v3 = f3['uswrf'][i, 31:47, 38:49]
+		v4 = f4['ulwrf'][i, 31:47, 38:49]
+		v5 = f5['lhtfl'][i, 31:47, 38:49]
+		v6 = f6['prate'][i, 31:47, 38:49]
+		x = np.multiply(v1, 86400*28.94*v6-v5)
+		y = np.multiply(v1, v2 - v3 - v4)
+		QNCEP.append(np.average(v2-v3-v4))
+
+#print(86400*28.94*v6, v5)
+
+QERA = []
+PERA = []
+
+
+j=(year-initial)*4
+for i in range(j, j+4):
+    v1 = f7['lsm'][0, :, :]
+    v2 = f8['mtnswrf'][i, :, :]
+    v3 = f8['mtnlwrf'][i, :, :]
+    v4 = f8['mtpr'][i, :, :]
+    v5 = f8['mer'][i, :, :]
+    x = np.multiply(v1, 86400*28.94*(v4+v5))
+    y = np.multiply(v1, v2+v3)
+    QERA.append(np.average(v2+v3))
+
+initial = 2000
+j=3+(year-initial)*12
+
+QCERES=[]
+for i in range(j, j+4):
+	QCERES.append(np.average(f9['toa_net_all_mon'][i, 100:120, 70:90]))
+
+plt.style.use('bmh') 
+X = ['June', 'July', 'August', 'September']
+
+plt.plot(X, QNCEP, c='b')
+plt.plot(X, QERA, c='tab:orange')
+if year>=2000:
+	plt.plot(X, QCERES, c='g')
+plt.ylabel("Qnet (W/m^2)")
+plt.title('Year: '+ str(year))
+plt.legend(['NCEP', 'ERA', 'CERES'])
+#plt.savefig('TGMS '+str(year)+'.png', dpi=150, bbox_inches="tight")
+plt.show()
+
+
+
+
+
+
+
+
+#JJAS comparison of Qnet from CERES, ERA5, NCEP, 2000-2021
+year1=2000
+year2=2022 #It won't include this year's values
+QNCEP = []
+PNCEP = []
+
+step = 12
+in1 = (year1 - 1979)*step+5
+in2 = (year2 - 1979)*step+5
+for i in range(in1, in2, step):
+		v1 = f1['land'][0, 31:47, 38:49]
+		v2 = f2['dswrf'][i, 31:47, 38:49] + f2['dswrf'][i+1, 31:47, 38:49] + f2['dswrf'][i+2, 31:47, 38:49] + f2['dswrf'][i+3, 31:47, 38:49] 
+		v3 = f3['uswrf'][i, 31:47, 38:49] + f3['uswrf'][i+1, 31:47, 38:49] + f3['uswrf'][i+2, 31:47, 38:49] + f3['uswrf'][i+3, 31:47, 38:49]
+		v4 = f4['ulwrf'][i, 31:47, 38:49] + f4['ulwrf'][i+1, 31:47, 38:49] + f4['ulwrf'][i+2, 31:47, 38:49] + f4['ulwrf'][i+3, 31:47, 38:49] 
+		y = np.multiply(v1, v2 - v3 - v4)
+		QNCEP.append(np.average(v2 - v3 - v4)/4)
+
+QERA = []
+PERA = []
+
+step = 4
+in1 = (year1 - 1979)*step
+in2 = (year2 - 1979)*step
+for i in range(in1, in2, step):
+    v1 = f7['lsm'][0, :, :]
+    v2 = f8['mtnswrf'][i, :, :] + f8['mtnswrf'][i+1, :, :] + f8['mtnswrf'][i+2, :, :] + f8['mtnswrf'][i+3, :, :]
+    v3 = f8['mtnlwrf'][i, :, :] + f8['mtnlwrf'][i+1, :, :] + f8['mtnlwrf'][i+2, :, :] + f8['mtnlwrf'][i+3, :, :]
+    y = np.multiply(v1, v2+v3)
+    QERA.append(np.average(v2+v3)/4)
+
+QCERES=[]
+
+step = 12
+in1 = (year1 - 2000)*step + 3
+in2 = (year2 - 2000)*step + 3
+for i in range(in1, in2, step):
+	QCERES.append(np.average(f9['toa_net_all_mon'][i, 100:120, 70:90]+f9['toa_net_all_mon'][i+1, 100:120, 70:90]+f9['toa_net_all_mon'][i+2, 100:120, 70:90]+f9['toa_net_all_mon'][i+3, 100:120, 70:90])/4)
+
+X = np.linspace(2000, 2021, 22)
+plt.style.use('bmh')
+
+plt.title("JJAS average comparison for 2000-2021 over 10-30N, 70-90E")
+plt.plot(X, QERA, c='tab:orange')
+plt.plot(X, QNCEP, c='b')
+plt.plot(X, QCERES, c='g')
+plt.legend(['ERA', 'NCEP', 'CERES'])
+plt.ylabel('Qnet (W/m^2)')
+plt.show()
