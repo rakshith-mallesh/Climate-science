@@ -550,3 +550,58 @@ plt.plot(X, QCERES, c='g')
 plt.legend(['ERA', 'NCEP', 'CERES'])
 plt.ylabel('Qnet (W/m^2)')
 plt.show()
+
+
+
+
+
+#JJAS TGMS using CERES Qnet and ERA P-E
+
+PERA = []
+
+year1=2000
+year2=2022
+step = 4
+in1 = (year1 - 1979)*step
+in2 = (year2 - 1979)*step
+for i in range(in1, in2, step):
+	v1 = f7['lsm'][0, :, :]
+	v4 = f8['mtpr'][i, :, :] + f8['mtpr'][i+1, :, :] + f8['mtpr'][i+2, :, :] + f8['mtpr'][i+3, :, :]
+	v5 = f8['mer'][i, :, :] + f8['mer'][i+1, :, :] + f8['mer'][i+2, :, :] + f8['mer'][i+3, :, :]
+	x = np.multiply(v1, 86400*28.94*(v4+v5))
+	PERA.append(np.average(x[np.nonzero(x)])/4)
+
+QCERES=[]
+
+step = 12
+in1 = (year1 - 2000)*step + 3
+in2 = (year2 - 2000)*step + 3
+for i in range(in1, in2, step):
+	v1 = f10['topo'][100:120, 70:90]
+	v1[v1!=1] = 0
+	v2 = f9['toa_net_all_mon'][i, 100:120, 70:90]+f9['toa_net_all_mon'][i+1, 100:120, 70:90]+f9['toa_net_all_mon'][i+2, 100:120, 70:90]+f9['toa_net_all_mon'][i+3, 100:120, 70:90]
+	y = np.multiply(v1, v2)
+	QCERES.append(np.average(y[np.nonzero(y)])/4)
+
+TGMS = []
+for i in range(len(PERA)):
+    TGMS.append(QCERES[i]/PERA[i])
+
+X = np.linspace(2000, 2021, 22)
+plt.style.use('bmh')
+
+plt.subplot(3,1,1)
+plt.plot(X, PERA, c='tab:orange')
+plt.title("JJAS average comparison for 2000-2021 over 10-30N, 70-90E")
+plt.ylabel('P-E (W/m^2)')
+plt.legend('ERA')
+
+plt.subplot(3,1,2)
+plt.plot(X, QCERES, c='g')
+plt.ylabel('Qnet (W/m^2)')
+plt.legend('CERES')
+
+plt.subplot(3,1,3)
+plt.plot(X, TGMS, c='b')
+plt.ylabel('TGMS')
+plt.show()
