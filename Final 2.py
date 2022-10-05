@@ -605,3 +605,56 @@ plt.subplot(3,1,3)
 plt.plot(X, TGMS, c='b')
 plt.ylabel('TGMS')
 plt.show()
+
+
+
+
+
+
+
+#calculating relative contributions from TGMS and Qnet for P-E
+Pint = PERA
+Qint = QCERES
+Gint = TGMS
+
+print(np.max(Pint), np.argmax(Pint))
+print(np.min(Pint), np.argmin(Pint))
+
+
+Q = np.average(Qint)
+P = np.average(Pint)
+G = Q/P
+
+#yearly contribution
+dQ = []
+dG = []
+for i in range(len(Pint)):
+	dQ.append(Qint[i]-Q)
+	dG.append(Gint[i]-G)
+
+
+dP = []
+Qcont = []
+Tcont = []
+for i in range(len(Pint)):
+	Qcont.append((dQ[i]*Pint[i]/Q)/(1+(dG[i]/G)))
+	Tcont.append((-dG[i]*Pint[i]/G)/(1+(dG[i]/G)))
+	dP.append(Pint[i]-P)
+	
+
+sum = np.add(Tcont, Qcont).tolist()
+
+arr = np.array(dP)
+ind = X # the x locations for the groups
+width = 0.35       # the width of the bars
+
+plt.bar(ind, dP, width)
+plt.bar(ind+width, Tcont, width, color='seagreen')
+plt.bar(ind+width, Qcont, width, color='tab:orange')
+plt.xticks(X, X)        #shows all the x labels
+plt.xlabel('Year')
+plt.ylabel('W/m^2')
+plt.title('Contributions from Qnet and TGMS')
+plt.legend(['Change in P', 'Contribution from TGMS', 'Contribution from Qnet']) 
+plt.show()
+
