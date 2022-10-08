@@ -658,3 +658,43 @@ plt.title('Contributions from Qnet and TGMS')
 plt.legend(['Change in P', 'Contribution from TGMS', 'Contribution from Qnet']) 
 plt.show()
 
+
+
+
+#Decadal contribution for 2001-2020
+
+
+Q1 = np.average(Qint[1:11])
+Q2 = np.average(Qint[11:21])
+P1 = np.average(Pint[1:11])
+P2 = np.average(Pint[11:21])
+G1 = Q1/P1
+G2 = Q2/P2
+
+Q = np.average(Qint)
+P = np.average(Pint)
+G = Q/P
+
+#yearly contribution
+dQ = Q2-Q1
+dG = G2-G1
+
+dP = P2-P1
+Qcont = []
+Tcont = []
+Qcont.append((dQ*P/Q)/(1+(dG/G)))
+Tcont.append((-dG*P/G)/(1+(dG/G)))
+
+sum = np.add(Tcont, Qcont).tolist()
+ind = np.arange(1)
+width = 0.1       # the width of the bars
+
+plt.style.use('bmh')
+plt.bar(ind, dP, width)
+plt.bar(ind+width, Tcont, width, color='seagreen')
+plt.bar(ind+width, Qcont, width, color='tab:orange')
+plt.xlabel('2001-2020')
+plt.ylabel('W/m^2')
+plt.title('Contributions from Qnet and TGMS (Decadal scale)')
+plt.legend(['Change in P', 'Contribution from TGMS', 'Contribution from Qnet'], bbox_to_anchor = (1, 1)) 
+plt.show()
