@@ -698,3 +698,46 @@ plt.ylabel('W/m^2')
 plt.title('Contributions from Qnet and TGMS (Decadal scale)')
 plt.legend(['Change in P', 'Contribution from TGMS', 'Contribution from Qnet'], bbox_to_anchor = (1, 1)) 
 plt.show()
+
+
+
+
+
+
+#Holocene TGMS vs Pwat
+data = pd.read_csv('Landsat.csv') # 22040 rows and 5 columns
+# index =  22000 - how many years back 
+df_3 = data.iloc[12000:22000,:] #Holocene
+
+X1=df_3["Qdiv"].values
+Y1=df_3["Pwat"].values
+Z1=df_3["(P-E)"].values
+T =df_3["TGMS"].values
+
+
+xavg=np.array([]) #10 year means
+yavg=np.array([])
+zavg=np.array([])
+for i in range(0, 1000): #calculating arrays of 10-year averages for each variable
+	df = df_3.iloc[i*10:10+i*10,:]
+	xavg = np.append(xavg, np.mean(df["Qdiv"].values))
+	yavg = np.append(yavg, np.mean(df["Pwat"].values))
+	zavg = np.append(zavg, np.mean(df["(P-E)"].values))
+
+TGMS = []
+for i in range(len(zavg)):
+	TGMS.append(xavg[i]/zavg[i])
+
+plt.style.use('bmh')
+X = np.linspace(-10000, 0, 1000)
+
+#print(np.max(zavg), np.argmax(zavg))
+
+print(len(zavg))
+plt.scatter(yavg, TGMS, c='black', s=4)
+plt.xlabel('Pwat (kg/m^2)')
+plt.ylabel('TGMS')
+plt.title("-10,000 years to 1990 CE (decadal averages) ")
+plt.show()
+
+print(np.corrcoef(yavg, TGMS))
