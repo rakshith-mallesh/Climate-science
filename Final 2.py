@@ -16,6 +16,12 @@ from scipy import signal
 #print(f1['sst']) Gives details about the variable
 #print(f1['longitude'][280:360]) Prints the array
 
+
+#constants
+g = 9.80616
+Cp = 1004.64
+Lv = 2.501e6
+
 ## Conversions
 # kg/m2/s to W/m2: *86400*28.96
 # kg/m2/s to mm/month: *86400
@@ -741,3 +747,129 @@ plt.title("-10,000 years to 1990 CE (decadal averages) ")
 plt.show()
 
 print(np.corrcoef(yavg, TGMS))
+
+
+
+
+
+#Fitting a curve for TGMS vs Pwat, JJAS average from 1959-2021
+a = 'ERA levels.nc'
+f10 = netCDF4.Dataset(a)
+
+
+#Variable structure = [month, height, expver, lat, lon]
+#month = 256 (JJAS of 1959-2022), height = 37
+#expver = 0 for ERA5, = 1 for ERA5T
+#print(f8.variables.keys())
+# m = Moist static energy (Cp.T + g.Z + Lv.q)
+v1 = f7['lsm'][0, :, :]
+VMS = []
+for i in range(0,252,4):
+	sum = 0
+	for j in range(i, i+3):
+		m1 = np.array(Cp*f10['t'][j,14,:,:] + f10['z'][j,14,:,:] + Lv*f10['q'][j,14,:,:])
+		m2 = np.array(Cp*f10['t'][j,28,:,:] + f10['z'][j,28,:,:] + Lv*f10['q'][j,28,:,:])
+		sum = sum + np.multiply(v1, m1-m2)
+	VMS.append(np.average(sum[np.nonzero(sum)])/4)
+
+#Qdiv
+P = []
+Qdiv = []
+Pwat = []
+for i in range(5,756,12):
+	sum1 = 0
+	sum2 = 0
+	sum3 = 0
+	for j in range(i, i+3):
+		v2 = f8['mtnswrf'][j, :, :]
+		v3 = f8['mtnlwrf'][j, :, :]
+		v4 = f8['mslhf'][j, :, :]
+		v5 = f8['msshf'][j, :, :]
+		v6 = f8['msnswrf'][j, :, :]
+		v7 = f8['msnlwrf'][j, :, :]
+		v8 = f8['mtpr'][j, :, :]
+		v9 = f8['mer'][j, :, :]
+		v10 = f8['tcwv'][j, :, :]
+		sum1 = sum1 + v2+v3+v4+v5+v6+v7
+		sum2 = sum2 + 86400*28.96*(v8+v9)
+		sum3 = sum3 + v10
+	x = np.multiply(v1, sum1)
+	y = np.multiply(v1, sum2)
+	z = np.multiply(v1, sum3)
+	Qdiv.append(np.average(x[np.nonzero(x)])/4)
+	P.append(np.average(y[np.nonzero(y)])/4)
+	Pwat.append(np.average(z[np.nonzero(z)])/4)
+
+TGMS = []
+rat = []
+rec = []
+for i in range(len(P)):
+	TGMS.append(Qdiv[i]/P[i])
+	rat.append(VMS[i]/Pwat[i])
+	rec.append(1/Pwat[i])
+
+
+'''
+plt.scatter(rec, TGMS, c='black')
+plt.xlabel('1/Pwat (1/Kg/m^2)')
+plt.ylabel('TGMS')
+plt.title('Yearly JJAS average TGMS vs 1/Pwat')
+#plt.figtext(0.4, 0.2, 'Correlation ='+ str(np.corrcoef(rec, TGMS)[1]))
+plt.legend(['ERA5'])
+
+'''
+
+
+
+def objective(x, a, b, c):
+	return a * x + b * x**2 + c
+# fit a second degree polynomial
+from scipy.optimize import curve_fit
+from matplotlib import pyplot
+ 
+# define the true objective function
+def objective(x, a, b, c):
+	return a * x + b * x**2 + c
+# choose the input and output variables
+x, y = rec, TGMS 
+# curve fit
+popt, _ = curve_fit(objective, x, y)
+# summarize the parameter values
+a, b, c = popt
+
+print('y = %.5f * x + %.5f * x^2 + %.5f' % (a, b, c))
+# plot input vs output
+plt.style.use("bmh")
+pyplot.scatter(x, y)
+
+# define a sequence of inputs between the smallest and largest known inputs
+x_line = np.linspace(np.min(x), np.max(x), 100)
+#x_line = np.linspace(0, 0.05, 100)
+
+# calculate the output for the range
+y_line = objective(x_line, a, b, c)
+che = objective(x_line, -224, 5108, 3.2)
+pyplot.plot(x_line, y_line, color='red', label = 'Best fit for ERA5')
+pyplot.plot(x_line, che, color='g', label="Dr. Chetan's fit")
+plt.ylabel('TGMS')
+plt.xlabel('1/Pwat (m^2/kg)')
+#plt.figtext(0.2, 0.6, 'TGMS = 8217/Pwat\u00b2 - 402/Pwat + 5')
+plt.legend()
+plt.title('JJAS average 1959-2021')
+pyplot.show()
+
+pred = []
+for i in rec:
+	pred.append(a * i + b * i**2 + c)
+
+sum2 = 0
+for i in range(len(rec)):
+	sum2 = sum2 + abs(pred[i]-TGMS[i])
+
+print(math.sqrt(sum2/len(rec)))
+print(len(TGMS))
+print(np.argmax(TGMS), TGMS[28])
+
+
+
+
