@@ -3,6 +3,8 @@
 # Cartopy
 # Xarray
 # pyNGL and pyNIO
+# geopandas 
+# basemap
 import pandas as pd
 import numpy as np
 import netCDF4
