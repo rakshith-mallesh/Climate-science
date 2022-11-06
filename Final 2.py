@@ -1,3 +1,8 @@
+# Some python packages for atmospheric sciences:
+# Metpy
+# Cartopy
+# Xarray
+# pyNGL and pyNIO
 import pandas as pd
 import numpy as np
 import netCDF4
