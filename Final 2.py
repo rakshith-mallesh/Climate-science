@@ -880,3 +880,17 @@ print(np.argmax(TGMS), TGMS[28])
 
 
 
+
+
+
+# Doing vertical integration
+fac = 100/g
+
+Estimate = []
+for i in range(0, 12):
+	sum = 0
+	for j in range(0,36):
+		sum = sum +  fac * ((f1['q'][i, j, 1:10, 1:10] + f1['q'][i, j+1, 1:10, 1:10])/2) * (f1['level'][j+1] - f1['level'][j])                             
+	Estimate.append(np.average(sum))
+
+
