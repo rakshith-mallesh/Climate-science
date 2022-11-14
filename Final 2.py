@@ -36,15 +36,13 @@ Lv = 2.501e6
 
 
 
-#Latitude and Longitude bounds 
-latbounds = [15, 25]
-lonbounds = [75, 85]
-lats = f1.variables['latitude'][:]
-lons = f1.variables['longitude'][:]
+#choosing Latitude and Longitude bounds 
+lats = f7['lat'][:] 
+lons = f7['lon'][:]
+lat_bnds, lon_bnds = [0, 30], [70, 90]
 
-# latitude lower and upper index
-latli = np.argmin( np.abs( lats - latbounds[0] ) )
-latui = np.argmin( np.abs( lats - latbounds[1] ) ) 
+lat_inds = np.where((lats >= lat_bnds[0]) & (lats <= lat_bnds[1]))
+lon_inds = np.where((lons >= lon_bnds[0]) & (lons <= lon_bnds[1]))
 
 
 
@@ -892,5 +890,44 @@ for i in range(0, 12):
 	for j in range(0,36):
 		sum = sum +  fac * ((f1['q'][i, j, 1:10, 1:10] + f1['q'][i, j+1, 1:10, 1:10])/2) * (f1['level'][j+1] - f1['level'][j])                             
 	Estimate.append(np.average(sum))
+	
+
+	
+	
+	
+	
+#Spatial plot
+
+lats = f7['lat'][lat_inds]
+lons = f7['lon'][lon_inds]
+v1 = f1['land'][0, 33:42, 38:47]
+v2 = f7['pr_wtr'][10, lat_inds[0], lon_inds[0]]
+
+# These coordinates are just for the background map plot (can be wider or shorter than the grid)
+m = Basemap(projection = 'merc',
+				llcrnrlon = 50, #70 for India
+				llcrnrlat = 0, #10 for India
+				urcrnrlon = 100, #90 for India
+				urcrnrlat = 50, #30 for India
+				resolution = 'i') 
+
+
+
+
+lon, lat = np.meshgrid(lons, lats)
+x, y = m(lon, lat)
+m.fillcontinents(color='tan',lake_color='lightblue')
+c_scheme = m.pcolor(x, y, np.squeeze(v2), cmap="inferno")
+#some cmaps: viridis, coolwarm, turbo (most info), inferno (fav)
+m.drawmapboundary(fill_color='lightblue')
+m.drawcoastlines()
+m.drawcountries()
+cbar = m.colorbar(c_scheme, pad="10%")
+m.drawparallels(np.arange(-80, 81, 5), labels=[1,0,0,0], fontsize=10)
+m.drawmeridians(np.arange(-180, 181, 5), labels=[0,0,0,1], fontsize=10)
+#the 5 here indicates the line marks on the map is for every 5 degrees
+plt.title('Pwat')
+plt.show()
+
 
 
