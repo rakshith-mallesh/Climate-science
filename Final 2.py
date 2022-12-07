@@ -777,105 +777,6 @@ for i in range(0,252,4):
 		sum = sum + np.multiply(v1, m1-m2)
 	VMS.append(np.average(sum[np.nonzero(sum)])/4)
 
-#Qdiv
-P = []
-Qdiv = []
-Pwat = []
-for i in range(5,756,12):
-	sum1 = 0
-	sum2 = 0
-	sum3 = 0
-	for j in range(i, i+3):
-		v2 = f8['mtnswrf'][j, :, :]
-		v3 = f8['mtnlwrf'][j, :, :]
-		v4 = f8['mslhf'][j, :, :]
-		v5 = f8['msshf'][j, :, :]
-		v6 = f8['msnswrf'][j, :, :]
-		v7 = f8['msnlwrf'][j, :, :]
-		v8 = f8['mtpr'][j, :, :]
-		v9 = f8['mer'][j, :, :]
-		v10 = f8['tcwv'][j, :, :]
-		sum1 = sum1 + v2+v3+v4+v5+v6+v7
-		sum2 = sum2 + 86400*28.96*(v8+v9)
-		sum3 = sum3 + v10
-	x = np.multiply(v1, sum1)
-	y = np.multiply(v1, sum2)
-	z = np.multiply(v1, sum3)
-	Qdiv.append(np.average(x[np.nonzero(x)])/4)
-	P.append(np.average(y[np.nonzero(y)])/4)
-	Pwat.append(np.average(z[np.nonzero(z)])/4)
-
-TGMS = []
-rat = []
-rec = []
-for i in range(len(P)):
-	TGMS.append(Qdiv[i]/P[i])
-	rat.append(VMS[i]/Pwat[i])
-	rec.append(1/Pwat[i])
-
-
-'''
-plt.scatter(rec, TGMS, c='black')
-plt.xlabel('1/Pwat (1/Kg/m^2)')
-plt.ylabel('TGMS')
-plt.title('Yearly JJAS average TGMS vs 1/Pwat')
-#plt.figtext(0.4, 0.2, 'Correlation ='+ str(np.corrcoef(rec, TGMS)[1]))
-plt.legend(['ERA5'])
-
-'''
-
-
-
-def objective(x, a, b, c):
-	return a * x + b * x**2 + c
-# fit a second degree polynomial
-from scipy.optimize import curve_fit
-from matplotlib import pyplot
- 
-# define the true objective function
-def objective(x, a, b, c):
-	return a * x + b * x**2 + c
-# choose the input and output variables
-x, y = rec, TGMS 
-# curve fit
-popt, _ = curve_fit(objective, x, y)
-# summarize the parameter values
-a, b, c = popt
-
-print('y = %.5f * x + %.5f * x^2 + %.5f' % (a, b, c))
-# plot input vs output
-plt.style.use("bmh")
-pyplot.scatter(x, y)
-
-# define a sequence of inputs between the smallest and largest known inputs
-x_line = np.linspace(np.min(x), np.max(x), 100)
-#x_line = np.linspace(0, 0.05, 100)
-
-# calculate the output for the range
-y_line = objective(x_line, a, b, c)
-che = objective(x_line, -224, 5108, 3.2)
-pyplot.plot(x_line, y_line, color='red', label = 'Best fit for ERA5')
-pyplot.plot(x_line, che, color='g', label="Dr. Chetan's fit")
-plt.ylabel('TGMS')
-plt.xlabel('1/Pwat (m^2/kg)')
-#plt.figtext(0.2, 0.6, 'TGMS = 8217/Pwat\u00b2 - 402/Pwat + 5')
-plt.legend()
-plt.title('JJAS average 1959-2021')
-pyplot.show()
-
-pred = []
-for i in rec:
-	pred.append(a * i + b * i**2 + c)
-
-sum2 = 0
-for i in range(len(rec)):
-	sum2 = sum2 + abs(pred[i]-TGMS[i])
-
-print(math.sqrt(sum2/len(rec)))
-print(len(TGMS))
-print(np.argmax(TGMS), TGMS[28])
-
-
 
 
 
@@ -927,6 +828,207 @@ m.drawparallels(np.arange(-80, 81, 5), labels=[1,0,0,0], fontsize=10)
 m.drawmeridians(np.arange(-180, 181, 5), labels=[0,0,0,1], fontsize=10)
 #the 5 here indicates the line marks on the map is for every 5 degrees
 plt.title('Pwat')
+plt.show()
+
+
+
+
+
+
+#TGMS fit
+import numpy as np
+import matplotlib.pyplot as plt
+import netCDF4
+from sklearn import preprocessing, svm
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+import math
+
+g = 'land sea ERA.nc'
+f7 = netCDF4.Dataset(g)
+h = 'TGMS ERA 1959-2021, India only.nc'
+f8 = netCDF4.Dataset(h)
+a = 'ERA levels.nc'
+f10 = netCDF4.Dataset(a)
+v1 = f7['lsm'][0, :, :]
+
+#constants
+g = 9.80616
+Cp = 1004.64
+Lv = 2.501e6
+
+P1 = []
+Qdiv1 = []
+Pwat1 = []
+for i in range(5,756,12):
+	sum1 = 0
+	sum2 = 0
+	sum3 = 0
+	for j in range(i, i+3):
+		v2 = f8['mtnswrf'][j, :, :]
+		v3 = f8['mtnlwrf'][j, :, :]
+		v4 = f8['mslhf'][j, :, :]
+		v5 = f8['msshf'][j, :, :]
+		v6 = f8['msnswrf'][j, :, :]
+		v7 = f8['msnlwrf'][j, :, :]
+		v8 = f8['mtpr'][j, :, :]
+		v9 = f8['mer'][j, :, :]
+		v10 = f8['tcwv'][j, :, :]
+		sum1 = sum1 + v2+v3+v4+v5+v6+v7
+		sum2 = sum2 + 86400*28.96*(v8+v9)
+		sum3 = sum3 + v10
+	x = np.multiply(v1, sum1)
+	y = np.multiply(v1, sum2)
+	z = np.multiply(v1, sum3)
+	Qdiv1.append(np.average(x[np.nonzero(x)])/4)
+	P1.append(np.average(y[np.nonzero(y)])/4)
+	Pwat1.append(np.average(z[np.nonzero(z)])/4)
+
+TGMS1 = []
+rat1 = []
+rec1 = []
+for i in range(len(P1)):
+	TGMS1.append(Qdiv1[i]/P1[i])
+	rec1.append(1/Pwat1[i])
+
+
+# choose the input and output variables
+x1, y1 = rec1, TGMS1 
+
+
+
+
+
+
+
+a = "land sea.nc"
+b = "dswrf.ntat.nc"
+c = "uswrf.ntat.nc"
+d = "ulwrf.ntat.nc"
+e = "lhtfl.nc" #this is the evaporation rate
+f = "shtfl.nc"
+g = "dswrf.sfc.nc"
+h = "uswrf.sfc.nc"
+i = "dlwrf.sfc.nc"
+j = "ulwrf.sfc.nc"
+k = "prate.nc"
+l = "pr_wtr.nc"
+
+f1 = netCDF4.Dataset(a)
+f2 = netCDF4.Dataset(b)
+f3 = netCDF4.Dataset(c)
+f4 = netCDF4.Dataset(d)
+f5 = netCDF4.Dataset(e)
+f6 = netCDF4.Dataset(f)
+f7 = netCDF4.Dataset(g)
+f8 = netCDF4.Dataset(h)
+f9 = netCDF4.Dataset(i)
+f10 = netCDF4.Dataset(j)
+f11 = netCDF4.Dataset(k)
+f12 = netCDF4.Dataset(l)
+
+P = []
+Qdiv = []
+Pwat = []
+for j in range(0, 516, 12):
+	sum1 = 0
+	sum2 = 0
+	sum3 = 0
+	for i in range(5+j, 8+j):
+		v10 = f1['land'][0, 31:42, 38:49]
+		v100 = f1['land'][0, 33:42, 38:47]
+		v2 = f2['dswrf'][i, 31:42, 38:49]
+		v3 = f3['uswrf'][i, 31:42, 38:49]
+		v4 = f4['ulwrf'][i, 31:42, 38:49]
+		v5 = f5['lhtfl'][i, 31:42, 38:49]
+		v6 = f6['shtfl'][i, 31:42, 38:49]
+		v7 = f7['dswrf'][i, 31:42, 38:49]
+		v8 = f8['uswrf'][i, 31:42, 38:49]
+		v9 = f9['dlwrf'][i, 31:42, 38:49]
+		v10 = f10['ulwrf'][i, 31:42, 38:49]
+		v11 = f11['prate'][i, 31:42, 38:49]
+		v12 = f12['pr_wtr'][i, 24:33, 28:37]
+		sum1 = sum1 + 86400*28.94*v11-v5
+		sum2 = sum2 + v2 - v3 - v4 + v5 + v6 - v7 + v8 - v9 + v10
+		sum3 = sum3 + v12
+	x = np.multiply(v10, sum1)
+	y = np.multiply(v10, sum2)
+	z = np.multiply(v100, sum3)
+	P.append(np.average(x[np.nonzero(x)])/4)
+	Qdiv.append(np.average(y[np.nonzero(y)])/4)
+	Pwat.append(np.average(z[np.nonzero(z)])/4)
+
+TGMS = []
+rec = []
+for i in range(len(Qdiv)):
+	TGMS.append(Qdiv[i]/P[i])
+	rec.append(1/Pwat[i])
+
+
+def objective(x, a, b, c):
+	return a * x + b * x**2 + c
+# fit a second degree polynomial
+from scipy.optimize import curve_fit
+from matplotlib import pyplot
+ 
+# define the true objective function
+def objective(x, a, b, c):
+	return a * x + b * x**2 + c
+# choose the input and output variables
+x, y = rec, TGMS 
+# curve fit
+popt, _ = curve_fit(objective, x, y)
+popt1, _ = curve_fit(objective, x1, y1)
+# summarize the parameter values
+a, b, c = popt
+a1, b1, c1 = popt1
+
+print('y = %.5f * x + %.5f * x^2 + %.5f' % (a, b, c)) #NCEP
+print('y = %.5f * x + %.5f * x^2 + %.5f' % (a1, b1, c1)) #ERA5
+# plot input vs output
+plt.style.use("bmh")
+pyplot.scatter(x1, y1, label ='ERA5 data', c='b')
+pyplot.scatter(x, y, label ='NCEP data', c='lime')
+
+# define a sequence of inputs between the smallest and largest known inputs
+#x_line = np.linspace(np.min(x1), np.max(x), 100)
+#x_line = np.linspace(0.020, 0.035, 100)
+x_line = np.linspace(0.024, 0.034, 100)
+
+# calculate the output for the range
+y_line = objective(x_line, a, b, c)
+y_line1 = objective(x_line, a1, b1, c1)
+che = objective(x_line, -224, 5108, 3.2)
+pyplot.plot(x_line, y_line, color='red', label = 'Best fit for NCEP')
+#pyplot.plot(x_line, che, color='tab:orange', label="Dr. Chetan's fit")
+pyplot.plot(x_line, y_line1, color='g', label="Best fit for ERA5")
+plt.ylabel('TGMS')
+plt.xlabel('1/Pwat (m\u00b2/kg)')
+plt.figtext(0.2, 0.6, 'TGMS = 8217/Pwat\u00b2 - 402/Pwat + 5')
+plt.figtext(0.45, 0.15, 'TGMS = 17574/Pwat\u00b2 - 1050/Pwat + 15')
+plt.legend()
+plt.title('JJAS average 1959-2021 (NCEP from 1979)')
+pyplot.show()
+
+pred = []
+for i in rec:
+	pred.append(a * i + b * i**2 + c)
+
+sum2 = 0
+for i in range(len(rec)):
+	sum2 = sum2 + abs(pred[i]-TGMS[i])
+
+print(math.sqrt(sum2/len(rec)))
+
+
+
+pyplot.scatter(Pwat1, y1, label ='ERA5 data', c='b')
+pyplot.scatter(Pwat, y, label ='NCEP data', c='lime')
+plt.ylabel('TGMS')
+plt.xlabel('Pwat (kg/m\u00b2)')
+plt.legend()
+plt.title('JJAS average 1959-2021 (NCEP from 1979)')
 plt.show()
 
 
