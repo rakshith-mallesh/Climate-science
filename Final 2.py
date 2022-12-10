@@ -30,9 +30,12 @@ Cp = 1004.64
 Lv = 2.501e6
 
 ## Conversions
+# 1 mm/day= 28.94 W/m2
+# mm/month = (mm/day) * 30.5
 # kg/m2/s to W/m2: *86400*28.96
-# kg/m2/s to mm/month: *86400
-# kg/m2/s to mm/day: *86400*number of days in month
+# kg/m2/s to mm/day: *86400
+
+
 
 
 
