@@ -5,8 +5,8 @@ ds = xr.open_dataset('pr_wtr.nc')
 ds #Will show all details
 
 ds1 = ds.sel(time='2022-01-15') #A particular data point
-ds2 = ds.sel(time=slice("2001-01-15", "2001-12-15"), lon=slice(70, 90), lat=slice(0, 30)) #All values of 2001, over 10-30N and 70-90E
-
+ds2 = ds.sel(time=slice("2001", "2001"), lon=slice(70, 90), lat=slice(10, 30)) #All values of 2001, over 10-30N and 70-90E
+ds3 = ds.sel(time=slice("2001-01-01", "2001-03-01"), lon=slice(70, 90), lat=slice(10, 30)) #First three months
 
 #Plotting 
 ax = plt.axes(projection=ccrs.PlateCarree())
