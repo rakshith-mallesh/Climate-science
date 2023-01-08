@@ -2,6 +2,16 @@ import xarray as xr
 import numpy as np
 import catopy.crs as ccrs
 ds = xr.open_dataset('pr_wtr.nc')
+
+a='/media/rakshith/Seagate Expansion Drive/mraks/CMIP6/prw_Amon_NESM3_historical_r2i1p1f1_gn_185001-201412.nc'
+b='/media/rakshith/Seagate Expansion Drive/mraks/CMIP6/pr_Amon_NESM3_historical_r2i1p1f1_gn_185001-201412.nc'
+datasets = [a,b]
+# Open the datasets and combine them into a single xarray dataset
+ds = xr.open_mfdataset(datasets)
+
+
+
+
 ds #Will show all details
 
 ds1 = ds.sel(time='2022-01-15') #A particular data point
@@ -33,4 +43,11 @@ def func(month):
 
 season = ds.sel(time=func(ds['time.month'])) #Works always
 
-da_jja_only = ds.sel(time=ds.time.dt.month.isin([6, 7, 8])) #Works only if time is a datetime object
+#Works only if time is a datetime object
+jjas = ds.time.dt.month.isin(range(6, 10))
+clim = ds.sel(time=jjas) #ds with only JJAS months
+
+
+#JJAS means
+jjas = ds.time.dt.month.isin(range(6, 10))
+clim = ds.sel(time=jjas).mean("time")
