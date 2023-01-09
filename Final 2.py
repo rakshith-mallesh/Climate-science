@@ -1036,3 +1036,28 @@ plt.show()
 
 
 
+
+
+
+#Calculating constants by year for ERA5
+def func(p, pwat, qnet):
+    return ((qnet+p)*pwat)/p
+out = func(np.array(P1), np.array(Pwat1), np.array(Qdiv1))
+
+from sklearn.linear_model import LinearRegression
+regr = LinearRegression()
+x = np.array(X).reshape(-1, 1)
+y = np.array(out).reshape(-1, 1)
+regr.fit(x, y)
+y_pred = regr.predict(x)
+
+plt.plot(X, out, marker='o')
+plt.plot(X, y_pred, c='r', linestyle='--')
+#plt.xticks(X, X, rotation = 90)
+plt.ylabel('Value of constant')
+plt.xlabel('Year')
+plt.title('Yearly June, August averages, ERA5')
+#plt.figtext(0.6, 0.7, 'c = Pwat*(Qdiv/ (P-E))+1')
+#plt.title('Month: September')
+
+
