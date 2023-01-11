@@ -1061,3 +1061,98 @@ plt.title('Yearly June, August averages, ERA5')
 #plt.title('Month: September')
 
 
+## TGMS vs Pwat for each month, ERA
+
+P1 = []
+Qdiv1 = []
+Pwat1 = []
+P2 = []
+Qdiv2 = []
+Pwat2 = []
+P3 = []
+Qdiv3 = []
+Pwat3 = []
+P4 = []
+Qdiv4 = []
+Pwat4 = []
+
+Qlist = [Qdiv1, Qdiv2, Qdiv3, Qdiv4]
+Plist = [P1, P2, P3, P4]
+Pwatlist = [Pwat1, Pwat2, Pwat3, Pwat4]
+for i in range(5,756,12):
+	sum1 = 0
+	sum2 = 0
+	sum3 = 0
+	for j in range(i, i+4):
+		v2 = f8['mtnswrf'][j, :, :]
+		v3 = f8['mtnlwrf'][j, :, :]
+		v4 = f8['mslhf'][j, :, :]
+		v5 = f8['msshf'][j, :, :]
+		v6 = f8['msnswrf'][j, :, :]
+		v7 = f8['msnlwrf'][j, :, :]
+		v8 = f8['mtpr'][j, :, :]
+		v9 = f8['mer'][j, :, :]
+		v10 = f8['tcwv'][j, :, :]
+		sum1 = v2+v3+v4+v5+v6+v7
+		sum2 = 86400*28.96*(v8+v9)
+		sum3 = v10
+		x = np.multiply(v1, sum1)
+		y = np.multiply(v1, sum2)
+		z = np.multiply(v1, sum3)
+		Qlist[j-i].append(np.average(x[np.nonzero(x)]))
+		Plist[j-i].append(np.average(y[np.nonzero(y)]))
+		Pwatlist[j-i].append(np.average(z[np.nonzero(z)]))
+
+TGMS1 = []
+TGMS2 = []
+TGMS3 = []
+TGMS4 = []
+for i in range(len(P1)):
+	TGMS1.append(Qdiv1[i]/P1[i])
+	TGMS2.append(Qdiv2[i]/P2[i])
+	TGMS3.append(Qdiv3[i]/P3[i])
+	TGMS4.append(Qdiv4[i]/P4[i])	
+
+TGMSlist = [TGMS1, TGMS2, TGMS3, TGMS4]
+
+for i in range(len(Months)):
+	plt.scatter(Pwatlist[i], TGMSlist[i], c='black')
+	for j in range(len(Pwat1)):
+		plt.annotate(str(X[j])[-2:], (Pwatlist[i][j], TGMSlist[i][j]))
+	plt.xlabel('Pwat (kg/m\u00b2)')
+	plt.ylabel('TGMS')
+	plt.title('1959-2021 for ' + Months[i] + ' from ERA5')
+	plt.show()
+
+
+print(np.corrcoef(TGMS1, Pwat1))
+print(np.corrcoef(TGMS2, Pwat2))
+print(np.corrcoef(TGMS3, Pwat3))
+print(np.corrcoef(TGMS4, Pwat4))
+
+plt.suptitle('1959-2021 from ERA5')
+plt.subplot(2,2,1)
+plt.scatter(Pwat1, TGMS1, c='black', label=Months[0])
+plt.ylabel('TGMS')
+plt.legend()
+plt.subplot(2,2,2)
+plt.scatter(Pwat2, TGMS2, c='g', label=Months[1])
+plt.legend()
+plt.subplot(2,2,3)
+plt.scatter(Pwat3, TGMS3, label=Months[2])
+plt.ylabel('TGMS')
+plt.xlabel('Pwat (kg/m\u00b2)')
+plt.legend()
+plt.subplot(2,2,4)
+plt.scatter(Pwat4, TGMS4, c='tab:orange', label=Months[3])
+plt.xlabel('Pwat (kg/m\u00b2)')
+plt.legend()
+plt.show()
+
+plt.scatter(Pwat2, TGMS2, c='lime', label=Months[1])
+plt.scatter(Pwat3, TGMS3, label=Months[2])
+plt.ylabel('TGMS')
+plt.xlabel('Pwat (kg/m\u00b2)')
+plt.ylim([0, 1])
+plt.legend()
+plt.show()
